@@ -66,12 +66,12 @@ app router
 
 ## Data model
 
-11 tables, all in `src/db/schema.ts` with Drizzle relations and cascade
+12 tables, all in `src/db/schema.ts` with Drizzle relations and cascade
 rules:
 
 `users` · `workspaces` · `workspace_members` (role enum) · `projects` ·
 `board_columns` · `tasks` (priority enum, position, `completedAt`) ·
-`labels` · `task_labels` · `comments` · `activities` · `rate_limits`
+`labels` · `task_labels` · `comments` · `activities` · `workspace_invitations` · `rate_limits`
 
 ## Implementation highlights
 
@@ -91,6 +91,7 @@ rules:
 - **Deep-linked task modal** — `?task=<id>` opens the editor from anywhere
   (palette results, dashboard rows), and clears on close.
 - **Security boundaries** — project/column/label/assignee relationships are checked server-side, project keys are unique per workspace, and authentication endpoints use a PostgreSQL-backed rate limiter.
+- **Invitation workflow** — workspace invites use short-lived hashed tokens, email-bound acceptance, and transactional membership creation.
 - **Email that degrades gracefully** — without `RESEND_API_KEY` messages
   are logged, never thrown.
 
@@ -137,6 +138,7 @@ redirect URI to register).
 | `npm run lint`      | ESLint                           |
 | `npm run typecheck` | `tsc --noEmit`                   |
 | `npm test`          | Run validation tests              |
+| `npm run db:migrate` | Apply committed Drizzle migrations |
 | `npx drizzle-kit push` | Apply schema to the database  |
 | `npx tsx scripts/seed.ts` | Seed demo data              |
 

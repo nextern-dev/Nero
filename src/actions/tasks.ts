@@ -51,33 +51,13 @@ export async function createTask(
     await requireLabelsInProject(data.labelIds, project.id);
     if (data.assigneeId) await requireWorkspaceMember(data.assigneeId, project.workspaceId);
 
-    const [counter] = await db
-      .update(projects)
-      .set({ taskCounter: sql`${projects.taskCounter} + 1` })
-      .where(eq(projects.id, project.id))
-      .returning({ n: projects.taskCounter });
-
-    const [task] = await db
-      .insert(tasks)
-      .values({
-        projectId: project.id,
-        columnId: data.columnId,
-        number: counter.n,
-        title: data.title,
-        description: data.description || null,
-        priority: data.priority,
-        assigneeId: data.assigneeId,
-        dueDate: data.dueDate,
-        position: await nextPosition(data.columnId),
-        creatorId: user.id,
-      })
-      .returning();
-
-    if (data.labelIds.length) {
-      await db.insert(taskLabels).values(
-        data.labelIds.map((labelId) => ({ taskId: task.id, labelId })),
-      );
-    }
+    const task = await db.transaction(async (tx) => {
+      const [counter] = await tx.update(projects).set({ taskCounter: sql`${projects.taskCounter} + 1` }).where(eq(projects.id, project.id)).returning({ n: projects.taskCounter });
+      const [positionRow] = await tx.select({ max: sql<number | null>`max(${tasks.position})` }).from(tasks).where(eq(tasks.columnId, data.columnId));
+      const [created] = await tx.insert(tasks).values({ projectId: project.id, columnId: data.columnId, number: counter.n, title: data.title, description: data.description || null, priority: data.priority, assigneeId: data.assigneeId, dueDate: data.dueDate, position: (positionRow?.max ?? 0) + 100, creatorId: user.id }).returning();
+      if (data.labelIds.length) await tx.insert(taskLabels).values(data.labelIds.map((labelId) => ({ taskId: created.id, labelId })));
+      return created;
+    });
 
     await logActivity({
       workspaceId: project.workspaceId,
@@ -213,6 +193,7 @@ export async function moveTask(input: unknown): Promise<ActionResult> {
     const parsed = moveTaskSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
     const { taskId, projectId, from, to } = parsed.data;
+    if (!from.ids.includes(taskId) || !to.ids.includes(taskId)) return { ok: false, error: "Invalid task ordering payload" };
     const { project } = await requireProjectAccess(user.id, projectId);
 
     const [task] = await db

@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: nero-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,9 +36,9 @@ jobs:
       AUTH_SECRET: ci-dummy-secret-not-used-by-build
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -39,8 +46,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Apply database schema
-        run: npx drizzle-kit push --force
+      - name: Apply database migrations
+        run: npm run db:migrate
 
       - name: Lint
         run: npm run lint

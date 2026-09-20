@@ -161,6 +161,25 @@ export const labels = pgTable(
   (t) => [index("labels_project_idx").on(t.projectId)],
 );
 
+export const workspaceInvitations = pgTable(
+  "workspace_invitations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: roleEnum("role").notNull().default("member"),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("workspace_invitations_workspace_idx").on(t.workspaceId),
+    index("workspace_invitations_expires_idx").on(t.expiresAt),
+  ],
+);
+
 export const rateLimits = pgTable(
   "rate_limits",
   {
@@ -244,6 +263,7 @@ export const workspacesRelations = relations(workspaces, ({ many }) => ({
   members: many(workspaceMembers),
   projects: many(projects),
   activities: many(activities),
+  invitations: many(workspaceInvitations),
 }));
 
 export const workspaceMembersRelations = relations(

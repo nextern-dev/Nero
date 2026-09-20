@@ -2,7 +2,7 @@
 
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { boardColumns } from "@/db/schema";
+import { boardColumns, tasks } from "@/db/schema";
 import { requireProjectAccess, requireUser } from "@/lib/session";
 import {
   columnCreateSchema,
@@ -87,6 +87,8 @@ export async function deleteColumn(columnId: string): Promise<ActionResult> {
       .where(eq(boardColumns.projectId, column.projectId));
     if ((count[0]?.n ?? 0) <= 1)
       return { ok: false, error: "A board needs at least one column" };
+    const [taskCount] = await db.select({ n: sql<number>`count(*)::int` }).from(tasks).where(eq(tasks.columnId, column.id));
+    if ((taskCount?.n ?? 0) > 0) return { ok: false, error: "Move or delete the column tasks before deleting this column" };
 
     await db.delete(boardColumns).where(eq(boardColumns.id, columnId));
     return { ok: true };

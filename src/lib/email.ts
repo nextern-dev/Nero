@@ -50,7 +50,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     to,
     "Welcome to Nero",
     shell(
-      `Welcome aboard, ${name}`,
+      `Welcome aboard, ${escapeHtml(name)}`,
       `Your workspace is ready. Nero keeps projects, tasks, priorities and your team
        in one shared place — with a board, comments and an activity history for every project.<br/><br/>
        Tip: press <b style="color:#FFA67E">⌘K</b> anywhere to search tasks and projects.`,
@@ -67,7 +67,7 @@ export async function sendInviteEmail(
     `${opts.inviterName} invited you to ${opts.workspaceName}`,
     shell(
       "You've been invited",
-      `<b style="color:#F6F0E3">${opts.inviterName}</b> added you to the
+      `<b style="color:#F6F0E3">${escapeHtml(opts.inviterName)}</b> added you to the
        <b style="color:#F6F0E3">${opts.workspaceName}</b> workspace on Nero.
        Create your account with this email to take your seat at the board.`,
     ),

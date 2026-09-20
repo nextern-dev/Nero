@@ -1,13 +1,15 @@
 "use server";
 
 import { and, eq, ne } from "drizzle-orm";
+import { createHash, randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { db } from "@/db";
-import { users, workspaceMembers, workspaces } from "@/db/schema";
+import { users, workspaceInvitations, workspaceMembers, workspaces } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { sendInviteEmail } from "@/lib/email";
 import { requireUser, requireWorkspace, WS_COOKIE } from "@/lib/session";
+import { consumeRateLimit } from "@/lib/rate-limit";
 import {
   memberAddSchema,
   memberRoleSchema,
@@ -82,6 +84,8 @@ export async function switchWorkspace(workspaceId: string): Promise<ActionResult
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
     revalidatePath("/", "layout");
     return { ok: true };
@@ -90,65 +94,24 @@ export async function switchWorkspace(workspaceId: string): Promise<ActionResult
   }
 }
 
-export async function addMember(
-  input: unknown,
-): Promise<ActionResult<{ invited: boolean; name?: string }>> {
+export async function addMember(input: unknown): Promise<ActionResult<{ invited: boolean; name?: string }>> {
   try {
     const ctx = await requireWorkspace();
-    if (ctx.role === "member")
-      return { ok: false, error: "Only owners and admins can add members" };
+    if (ctx.role === "member") return { ok: false, error: "Only owners and admins can add members" };
     const parsed = memberAddSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
     const email = parsed.data.email;
-
-    const [invitee] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    if (!invitee) {
-      await sendInviteEmail(email, {
-        workspaceName: ctx.workspace.name,
-        inviterName: ctx.user.name,
-      });
-      return {
-        ok: true,
-        data: { invited: true },
-      };
-    }
-
-    const [existing] = await db
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, ctx.workspace.id),
-          eq(workspaceMembers.userId, invitee.id),
-        ),
-      )
-      .limit(1);
-    if (existing)
-      return { ok: false, error: `${invitee.name} is already in this workspace` };
-
-    await db.insert(workspaceMembers).values({
-      workspaceId: ctx.workspace.id,
-      userId: invitee.id,
-      role: "member",
-    });
-
-    await logActivity({
-      workspaceId: ctx.workspace.id,
-      userId: ctx.user.id,
-      action: "member.joined",
-      meta: { name: invitee.name },
-    });
-
+    if (!(await consumeRateLimit("invite:" + ctx.workspace.id + ":" + email, 5, 60 * 60 * 1000))) return { ok: false, error: "Too many invitations. Try again later." };
+    const [invitee] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const [existing] = invitee ? await db.select().from(workspaceMembers).where(and(eq(workspaceMembers.workspaceId, ctx.workspace.id), eq(workspaceMembers.userId, invitee.id))).limit(1) : [];
+    if (existing) return { ok: false, error: "Already in this workspace" };
+    const rawToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    await db.insert(workspaceInvitations).values({ workspaceId: ctx.workspace.id, email, role: "member", tokenHash, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), invitedById: ctx.user.id });
+    await sendInviteEmail(email, { workspaceName: ctx.workspace.name, inviterName: ctx.user.name, token: rawToken });
     revalidatePath("/members");
-    return { ok: true, data: { invited: false, name: invitee.name } };
-  } catch (error) {
-    return err(error);
-  }
+    return { ok: true, data: { invited: true, name: invitee?.name } };
+  } catch (error) { return err(error); }
 }
 
 export async function removeMember(membershipId: string): Promise<ActionResult> {
@@ -173,6 +136,8 @@ export async function removeMember(membershipId: string): Promise<ActionResult> 
     if (target.role === "owner")
       return { ok: false, error: "You can't remove the workspace owner" };
 
+    if (ctx.role === "admin" && target.role !== "member") return { ok: false, error: "Admins can only remove members" };
+
     await db
       .delete(workspaceMembers)
       .where(eq(workspaceMembers.id, membershipId));
@@ -183,6 +148,22 @@ export async function removeMember(membershipId: string): Promise<ActionResult> 
   }
 }
 
+export async function acceptInvitation(token: string): Promise<ActionResult> {
+  try {
+    const user = await requireUser();
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const [invite] = await db.select().from(workspaceInvitations).where(and(eq(workspaceInvitations.tokenHash, tokenHash), eq(workspaceInvitations.acceptedAt, null))).limit(1);
+    if (!invite || invite.expiresAt <= new Date()) return { ok: false, error: "This invitation is invalid or expired" };
+    if (invite.email !== user.email.toLowerCase()) return { ok: false, error: "This invitation was sent to a different email address" };
+    await db.transaction(async (tx) => {
+      await tx.insert(workspaceMembers).values({ workspaceId: invite.workspaceId, userId: user.id, role: invite.role }).onConflictDoNothing();
+      await tx.update(workspaceInvitations).set({ acceptedAt: new Date() }).where(eq(workspaceInvitations.id, invite.id));
+    });
+    await logActivity({ workspaceId: invite.workspaceId, userId: user.id, action: "member.joined", meta: { name: user.name, via: "invitation" } });
+    revalidatePath("/members");
+    return { ok: true };
+  } catch (error) { return err(error); }
+}
 export async function changeMemberRole(input: unknown): Promise<ActionResult> {
   try {
     const ctx = await requireWorkspace();
