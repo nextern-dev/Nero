@@ -4,11 +4,10 @@ import { db } from "@/db";
 import { users, workspaceMembers, workspaces } from "@/db/schema";
 import { AVATAR_COLORS } from "@/lib/constants";
 import { sendWelcomeEmail } from "@/lib/email";
-import { createStarterProject } from "@/lib/onboard";
 import { slugify } from "@/lib/utils";
 
 /**
- * Creates a user with their own workspace and the guided starter project.
+ * Creates a user with their own empty workspace.
  * Shared by email registration and OAuth first-sign-in.
  */
 export async function provisionUser({
@@ -38,7 +37,6 @@ export async function provisionUser({
     .insert(workspaceMembers)
     .values({ workspaceId: workspace.id, userId: user.id, role: "owner" });
 
-  await createStarterProject(workspace.id, user.id);
   void sendWelcomeEmail(email, name);
 
   return { user, workspace };
