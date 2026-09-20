@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { createHash, randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -152,7 +152,7 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
   try {
     const user = await requireUser();
     const tokenHash = createHash("sha256").update(token).digest("hex");
-    const [invite] = await db.select().from(workspaceInvitations).where(and(eq(workspaceInvitations.tokenHash, tokenHash), eq(workspaceInvitations.acceptedAt, null))).limit(1);
+    const [invite] = await db.select().from(workspaceInvitations).where(and(eq(workspaceInvitations.tokenHash, tokenHash), isNull(workspaceInvitations.acceptedAt))).limit(1);
     if (!invite || invite.expiresAt <= new Date()) return { ok: false, error: "This invitation is invalid or expired" };
     if (invite.email !== user.email.toLowerCase()) return { ok: false, error: "This invitation was sent to a different email address" };
     await db.transaction(async (tx) => {
