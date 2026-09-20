@@ -265,9 +265,9 @@ function LandingNav() {
 
         <nav className="mx-auto hidden items-center gap-7 text-[12.5px] text-ink-400 md:flex">
           {[
-            ["Chapters", "#chapters"],
-            ["Manifesto", "#manifesto"],
-            ["Index", "#index"],
+            ["Features", "#features"],
+            ["How it works", "#how-it-works"],
+            ["Stack", "#stack"],
           ].map(([label, href]) => (
             <a
               key={href}
@@ -305,16 +305,15 @@ function LandingNav() {
 
 const STACK: [string, string][] = [
   ["Next.js 16", "Framework"],
-  ["React 19", "Interface"],
+  ["React 19", "UI"],
   ["Tailwind CSS 4", "Styling"],
-  ["PostgreSQL", "Memory"],
-  ["Drizzle ORM", "Access"],
-  ["Auth.js", "Identity"],
-  ["Zod", "Certainty"],
+  ["PostgreSQL", "Database"],
+  ["Drizzle ORM", "ORM"],
+  ["Auth.js v5", "Auth"],
+  ["Zod", "Validation"],
   ["Zustand", "State"],
-  ["Resend", "Letters"],
-  ["dnd kit", "Physics"],
-  ["Fraunces & Geist", "Voice"],
+  ["Resend", "Email"],
+  ["dnd kit", "Drag & drop"],
 ];
 
 export function Landing() {
@@ -343,7 +342,7 @@ export function Landing() {
           className="folio mb-8 flex items-center gap-3"
         >
           <LogoMark size={16} />
-          Open source · MIT · Self-hosted on your own Postgres
+          Open source · MIT · Self-hosted with PostgreSQL
         </motion.p>
 
         <h1 className="max-w-5xl font-display text-[13.5vw] leading-[0.98] font-medium tracking-[-0.02em] text-ink-50 sm:text-[86px] lg:text-[104px]">
@@ -364,7 +363,7 @@ export function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.28, ease: EASE }}
           >
-            as a fine art.
+            without the noise.
           </motion.span>
         </h1>
 
@@ -397,7 +396,7 @@ export function Landing() {
               href="/login"
               className="rounded-sm border border-ink-50/15 px-6 py-3.5 text-[14px] font-medium text-ink-200 transition-colors hover:border-brand-500/60 hover:text-brand-300"
             >
-              Enter the demo
+              Sign in
             </Link>
           </motion.div>
         </div>
@@ -557,7 +556,7 @@ export function Landing() {
             <LogoMark size={72} />
           </motion.div>
           <h2 className="mx-auto max-w-2xl font-display text-[40px] font-medium tracking-tight text-ink-50 sm:text-[56px]">
-            The page is blank.{" "}
+            Start with a workspace.{" "}
             <span className="text-gradient-brand italic">Begin.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[14px] text-ink-400">
@@ -587,7 +586,7 @@ export function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-5 sm:flex-row">
           <Logo size={20} />
           <p className="max-w-md text-center font-display text-[12px] leading-relaxed text-ink-500 italic sm:text-right">
-            Set in Fraunces & Geist. Printed on pixels. MIT licensed.
+            Open source · MIT licensed · Built with Next.js and PostgreSQL.
           </p>
         </div>
       </footer>
