@@ -15,7 +15,7 @@ test("project keys normalize to uppercase", () => {
 });
 
 test("task payload accepts empty optional assignment and labels", () => {
-  const parsed = taskCreateSchema.parse({ projectId: "550e8400-e29b-41d4-a716-446655440000", columnId: "6ba7b810-9dad-41d1-80b4-00c04fd430c8", title: "Ship release", assigneeId: "", labelIds: [] });
+  const parsed = taskCreateSchema.parse({ projectId: "550e8400-e29b-41d4-a716-446655440000", columnId: "550e8400-e29b-41d4-a716-446655440001", title: "Ship release", assigneeId: "", labelIds: [] });
   assert.equal(parsed.assigneeId, null);
   assert.deepEqual(parsed.labelIds, []);
 });
