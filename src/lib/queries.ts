@@ -143,7 +143,11 @@ export async function getProjectsWithProgress(
   const statsMap = new Map(statsRows.map((r) => [r.projectId, { total: Number(r.total), done: Number(r.done) }]));
 
   return projs.map((p) => {
-    const contributors = assigneeRows\n      .filter((r) => r.projectId === p.id)\n      .map((r) => userMap.get(r.assigneeId as string))\n      .filter(Boolean)\n      .slice(0, 4) as UserDTO[];
+    const contributors = assigneeRows
+      .filter((r) => r.projectId === p.id)
+      .map((r) => userMap.get(r.assigneeId as string))
+      .filter(Boolean)
+      .slice(0, 4) as UserDTO[];
     return {
       project: {
         id: p.id,
