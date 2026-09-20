@@ -14,26 +14,26 @@ const HIGHLIGHTS = [
   {
     icon: KanbanSquare,
     no: "01",
-    title: "Boards that feel instant",
-    body: "Drag, drop, reorder — optimistic updates, zero spinners.",
+    title: "Fast boards, fewer interruptions",
+    body: "Move work quickly with optimistic updates and persistent ordering.",
   },
   {
     icon: Command,
     no: "02",
-    title: "Command palette",
-    body: "⌘K to fly between tasks, projects and actions.",
+    title: "One place to find everything",
+    body: "Jump between projects, tasks, and actions without breaking flow.",
   },
   {
     icon: BarChart3,
     no: "03",
-    title: "Built-in charts",
-    body: "Tasks completed per day and open work by column, out of the box.",
+    title: "Progress without extra tools",
+    body: "See completed work, open work, and delivery trends from your board.",
   },
   {
     icon: ShieldCheck,
     no: "04",
-    title: "Secure by default",
-    body: "Auth.js sessions, hashed passwords, role-based access.",
+    title: "Clear team access",
+    body: "Role-based workspaces, protected sessions, and tenant-scoped data.",
   },
 ];
 
@@ -61,9 +61,9 @@ export default async function AuthLayout({
           <div className="mt-16 xl:mt-20">
             <p className="folio mb-6">Open source · Next.js 16 · PostgreSQL</p>
             <p className="max-w-md font-display text-[30px] leading-[1.15] font-medium tracking-tight text-ink-50 italic xl:text-[36px]">
-              Project management,
+              A focused workspace
               <br />
-              <span className="text-gradient-brand">as a fine art.</span>
+              <span className="text-gradient-brand">for work that moves.</span>
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export default async function AuthLayout({
           <div className="mt-14 flex items-center gap-3 border-t border-ink-50/[0.07] pt-6">
             <LogoMark size={16} />
             <p className="font-display text-[12.5px] text-ink-500 italic">
-              Set in Fraunces & Geist. Printed on pixels.
+              Open source · Self-hosted · Built with Next.js and PostgreSQL
             </p>
           </div>
         </div>
