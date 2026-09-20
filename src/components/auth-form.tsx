@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { login, loginWithGoogle, register } from "@/actions/auth";
@@ -82,14 +82,23 @@ export function LoginForm() {
 
   return (
     <div className="animate-mount">
-      <div className="mb-8 lg:hidden">
-        <Logo size={28} />
+      <div className="mb-7 flex items-center justify-between">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-400 transition-colors hover:text-ink-100"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Nero
+        </Link>
+        <div className="lg:hidden">
+          <Logo size={24} />
+        </div>
       </div>
       <h1 className="font-display text-[32px] font-medium tracking-tight text-ink-50 italic">
         Welcome back
       </h1>
-      <p className="mt-1.5 text-sm text-ink-400">
-        Sign in to your workspace to continue.
+      <p className="mt-1.5 text-sm leading-relaxed text-ink-400">
+        Pick up where you left off and keep your team moving.
       </p>
 
       <div className="mt-7">
@@ -132,26 +141,6 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setEmail("demo@nero.dev");
-          setPassword("demo1234");
-          setError(null);
-        }}
-        className="mt-4 flex w-full items-center gap-3 rounded-lg border border-brand-500/25 bg-brand-500/[0.07] px-3.5 py-3 text-left transition-colors hover:border-brand-500/45 hover:bg-brand-500/[0.11]"
-      >
-        <Sparkles className="h-4 w-4 shrink-0 text-brand-400" />
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-medium text-brand-300">
-            Try the demo workspace
-          </span>
-          <span className="block truncate font-mono text-[11px] text-ink-400">
-            demo@nero.dev · demo1234 — click to autofill
-          </span>
-        </span>
-      </button>
-
       <p className="mt-6 text-center text-[13px] text-ink-400">
         New to Nero?{" "}
         <Link
@@ -183,14 +172,23 @@ export function RegisterForm() {
 
   return (
     <div className="animate-mount">
-      <div className="mb-8 lg:hidden">
-        <Logo size={28} />
+      <div className="mb-7 flex items-center justify-between">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-400 transition-colors hover:text-ink-100"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Nero
+        </Link>
+        <div className="lg:hidden">
+          <Logo size={24} />
+        </div>
       </div>
       <h1 className="font-display text-[32px] font-medium tracking-tight text-ink-50 italic">
         Create your workspace
       </h1>
-      <p className="mt-1.5 text-sm text-ink-400">
-        One account. Boards, charts, your whole team.
+      <p className="mt-1.5 text-sm leading-relaxed text-ink-400">
+        Create a focused workspace for projects, tasks, and collaboration.
       </p>
 
       <div className="mt-7">
