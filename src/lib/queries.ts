@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, isNull, or, asc } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { subDays, startOfToday } from "date-fns";
 import { db } from "@/db";
 import {
@@ -129,37 +129,21 @@ export async function getProjectsWithProgress(
 
   if (!projs.length) return [];
 
-  const allTasks = await db
-    .select({
-      id: tasks.id,
-      projectId: tasks.projectId,
-      completedAt: tasks.completedAt,
-      assigneeId: tasks.assigneeId,
-    })
-    .from(tasks)
-    .where(
-      inArray(
-        tasks.projectId,
-        projs.map((p) => p.id),
-      ),
-    );
-
-  const userIds = [
-    ...new Set(allTasks.map((t) => t.assigneeId).filter(Boolean)),
-  ] as string[];
-  const assignees = userIds.length
-    ? await db.select().from(users).where(inArray(users.id, userIds))
-    : [];
+  const projectIds = projs.map((p) => p.id);
+  const [statsRows, assigneeRows] = await Promise.all([
+    db.select({ projectId: tasks.projectId, total: count(), done: sql<number>`count(*) filter (where ${tasks.completedAt} is not null)` })
+      .from(tasks).where(inArray(tasks.projectId, projectIds)).groupBy(tasks.projectId),
+    db.select({ projectId: tasks.projectId, assigneeId: tasks.assigneeId }).from(tasks)
+      .where(and(inArray(tasks.projectId, projectIds), sql`${tasks.assigneeId} is not null`))
+      .groupBy(tasks.projectId, tasks.assigneeId),
+  ]);
+  const userIds = assigneeRows.map((t) => t.assigneeId).filter(Boolean) as string[];
+  const assignees = userIds.length ? await db.select().from(users).where(inArray(users.id, userIds)) : [];
   const userMap = new Map(assignees.map((u) => [u.id, toUserDTO(u)]));
+  const statsMap = new Map(statsRows.map((r) => [r.projectId, { total: Number(r.total), done: Number(r.done) }]));
 
   return projs.map((p) => {
-    const related = allTasks.filter((t) => t.projectId === p.id);
-    const contributors = [
-      ...new Set(related.map((t) => t.assigneeId).filter(Boolean)),
-    ]
-      .map((id) => userMap.get(id as string))
-      .filter(Boolean)
-      .slice(0, 4) as UserDTO[];
+    const contributors = assigneeRows\n      .filter((r) => r.projectId === p.id)\n      .map((r) => userMap.get(r.assigneeId as string))\n      .filter(Boolean)\n      .slice(0, 4) as UserDTO[];
     return {
       project: {
         id: p.id,
@@ -170,8 +154,8 @@ export async function getProjectsWithProgress(
         dueDate: p.dueDate?.toISOString() ?? null,
         createdAt: p.createdAt.toISOString(),
       },
-      total: related.length,
-      done: related.filter((t) => t.completedAt).length,
+      total: statsMap.get(p.id)?.total ?? 0,
+      done: statsMap.get(p.id)?.done ?? 0,
       contributors,
     };
   });
@@ -205,7 +189,14 @@ export async function getMyTasks(
   const projectMap = new Map(projs.map((p) => [p.id, p]));
 
   const rows = await db
-    .select()
+    .select({
+      id: tasks.id,
+      title: tasks.title,
+      number: tasks.number,
+      priority: tasks.priority,
+      dueDate: tasks.dueDate,
+      projectId: tasks.projectId,
+    })
     .from(tasks)
     .where(
       and(
@@ -249,45 +240,27 @@ export async function getDashboardStats(workspaceId: string) {
     };
   }
 
-  const all = await db
-    .select({
-      id: tasks.id,
-      columnId: tasks.columnId,
-      completedAt: tasks.completedAt,
-      dueDate: tasks.dueDate,
-    })
-    .from(tasks)
-    .where(inArray(tasks.projectId, ids));
-
-  const today = startOfToday();
-  const weekAgo = subDays(new Date(), 7);
-  const twoWeeksAgo = subDays(new Date(), 14);
-
-  const open = all.filter((t) => !t.completedAt);
-  const statusCounts = new Map<string, number>();
-  const cols = await db
-    .select({ id: boardColumns.id, name: boardColumns.name })
-    .from(boardColumns)
-    .where(inArray(boardColumns.projectId, ids));
-  const colMap = new Map(cols.map((c) => [c.id, c.name]));
-  for (const t of open) {
-    const name = colMap.get(t.columnId) ?? "Other";
-    statusCounts.set(name, (statusCounts.get(name) ?? 0) + 1);
-  }
-
+  const [summary, completedRows, statusRows] = await Promise.all([
+    db.select({
+      open: sql<number>`count(*) filter (where ${tasks.completedAt} is null)`,
+      doneThisWeek: sql<number>`count(*) filter (where ${tasks.completedAt} >= ${weekAgo})`,
+      overdue: sql<number>`count(*) filter (where ${tasks.completedAt} is null and ${tasks.dueDate} < ${today})`,
+    }).from(tasks).where(inArray(tasks.projectId, ids)),
+    db.select({ completedAt: tasks.completedAt }).from(tasks)
+      .where(and(inArray(tasks.projectId, ids), sql`${tasks.completedAt} >= ${twoWeeksAgo}`)),
+    db.select({ name: boardColumns.name, count: count() }).from(tasks)
+      .innerJoin(boardColumns, eq(tasks.columnId, boardColumns.id))
+      .where(and(inArray(tasks.projectId, ids), isNull(tasks.completedAt)))
+      .groupBy(boardColumns.id, boardColumns.name),
+  ]);
+  const row = summary[0];
   return {
-    open: open.length,
-    doneThisWeek: all.filter((t) => t.completedAt && t.completedAt >= weekAgo)
-      .length,
-    overdue: open.filter((t) => t.dueDate && t.dueDate < today).length,
+    open: Number(row?.open ?? 0),
+    doneThisWeek: Number(row?.doneThisWeek ?? 0),
+    overdue: Number(row?.overdue ?? 0),
     projectCount: projs.length,
-    completedDates: all
-      .filter((t) => t.completedAt && t.completedAt >= twoWeeksAgo)
-      .map((t) => t.completedAt!.toISOString()),
-    statusBreakdown: [...statusCounts.entries()].map(([name, count]) => ({
-      name,
-      count,
-    })),
+    completedDates: completedRows.map((t) => t.completedAt?.toISOString()).filter(Boolean) as string[],
+    statusBreakdown: statusRows.map((s) => ({ name: s.name, count: Number(s.count) })),
   };
 }
 
@@ -350,7 +323,7 @@ export async function getMembersWithStats(
         })
         .from(tasks)
         .where(inArray(tasks.projectId, ids))
-    : [];
+
 
   return members.map((m) => ({
     ...toUserDTO(m.user),
@@ -389,15 +362,7 @@ export async function searchWorkspace(
     )
     .limit(4);
 
-  const allProjIds = (
-    await db
-      .select({ id: projects.id })
-      .from(projects)
-      .where(eq(projects.workspaceId, workspaceId))
-  ).map((p) => p.id);
-
-  const taskRows = allProjIds.length
-    ? await db
+  const taskRows = await db
         .select({
           id: tasks.id,
           title: tasks.title,
@@ -409,7 +374,7 @@ export async function searchWorkspace(
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.id))
         .where(
-          and(inArray(tasks.projectId, allProjIds), ilike(tasks.title, pattern)),
+          and(eq(projects.workspaceId, workspaceId), ilike(tasks.title, pattern)),
         )
         .limit(6)
     : [];
