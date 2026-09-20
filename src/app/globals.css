@@ -1,0 +1,313 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  --font-display: "Fraunces Variable", "Georgia", serif;
+
+  /* Noir — warm charcoal, like uncoated black paper */
+  --color-ink-950: #0d0b08;
+  --color-ink-900: #12100c;
+  --color-ink-850: #171410;
+  --color-ink-800: #1d1914;
+  --color-ink-750: #241f18;
+  --color-ink-700: #2e2820;
+  --color-ink-600: #443b2e;
+  --color-ink-500: #6b5d49;
+  --color-ink-400: #9c8d75;
+  --color-ink-300: #bcaf97;
+  --color-ink-200: #d8cdb8;
+  --color-ink-100: #ebe3d3;
+  --color-ink-50: #f6f0e3;
+
+  /* Vermilion — the crescent of the eclipse */
+  --color-brand-100: #ffe9dd;
+  --color-brand-200: #ffcdb4;
+  --color-brand-300: #ffa67e;
+  --color-brand-400: #ff7a47;
+  --color-brand-500: #ff5a24;
+  --color-brand-600: #ee4309;
+  --color-brand-700: #c53a0c;
+  --color-brand-800: #93300c;
+  --color-brand-900: #5e2008;
+
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 5s ease-in-out infinite;
+  --animate-mount: mount 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes mount {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink-950);
+}
+
+::selection {
+  background: rgba(255, 90, 36, 0.32);
+  color: #ffe9dd;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(255, 90, 36, 0.65);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Thin, dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-700) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer utilities {
+  /* Subtle warm blueprint grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 240, 222, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 240, 222, 0.03) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* Ruled paper — hairlines like a ledger */
+  .bg-ruled {
+    background-image: linear-gradient(
+      to bottom,
+      rgba(255, 240, 222, 0.045) 1px,
+      transparent 1px
+    );
+    background-size: 100% 28px;
+  }
+
+  .bg-glow-brand {
+    background: radial-gradient(
+      ellipse 60% 50% at 50% 0%,
+      rgba(255, 90, 36, 0.13),
+      transparent 70%
+    );
+  }
+
+  /* Soft vignette that anchors the page edges */
+  .bg-vignette {
+    background: radial-gradient(
+      ellipse 120% 90% at 50% 40%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.35) 100%
+    );
+  }
+
+  .mask-fade-y {
+    mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(
+      120deg,
+      #ffd7bc 0%,
+      #ff5a24 48%,
+      #e8a33c 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Fraunces' quirkier soul — for editorial italics */
+  .wonk {
+    font-variation-settings:
+      "WONK" 1,
+      "opsz" 144;
+  }
+
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  }
+
+  .card {
+    border-radius: 0.875rem;
+    border: 1px solid rgba(246, 240, 227, 0.07);
+    background: linear-gradient(
+        180deg,
+        rgba(246, 240, 227, 0.022),
+        rgba(246, 240, 227, 0)
+      ),
+      var(--color-ink-900);
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease;
+  }
+
+  /* Editorial plate — a framed figure */
+  .plate {
+    border: 1px solid rgba(246, 240, 227, 0.1);
+    background: var(--color-ink-900);
+    box-shadow:
+      0 1px 0 rgba(246, 240, 227, 0.04) inset,
+      0 40px 80px -40px rgba(0, 0, 0, 0.8);
+    transition:
+      transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 350ms ease,
+      border-color 350ms ease;
+  }
+  .plate-lift:hover {
+    transform: translateY(-4px);
+    border-color: rgba(246, 240, 227, 0.18);
+    box-shadow:
+      0 1px 0 rgba(246, 240, 227, 0.06) inset,
+      0 60px 90px -40px rgba(0, 0, 0, 0.9);
+  }
+
+  .input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(246, 240, 227, 0.09);
+    background: var(--color-ink-850);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-100);
+    outline: none;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      background 150ms ease;
+  }
+  .input::placeholder {
+    color: var(--color-ink-500);
+  }
+  .input:focus {
+    border-color: rgba(255, 90, 36, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 90, 36, 0.12);
+    background: var(--color-ink-800);
+  }
+
+  select.input option {
+    background: var(--color-ink-850);
+    color: var(--color-ink-100);
+  }
+
+  input[type="date"].input::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+  }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border-radius: 4px;
+    border: 1px solid rgba(246, 240, 227, 0.12);
+    border-bottom-width: 2px;
+    background: var(--color-ink-800);
+    padding: 1px 6px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-ink-300);
+  }
+
+  /* Editorial numbering "№ 01" */
+  .folio {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-brand-400);
+  }
+
+  /* Underline that draws itself on hover */
+  .u-link {
+    position: relative;
+  }
+  .u-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .u-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@layer base {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
