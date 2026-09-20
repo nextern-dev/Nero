@@ -346,7 +346,7 @@ export function Landing() {
         </motion.p>
 
         <h1 className="max-w-5xl font-display text-[13.5vw] leading-[0.98] font-medium tracking-[-0.02em] text-ink-50 sm:text-[86px] lg:text-[104px]">
-          {["Project", "management,"].map((line, i) => (
+          {["A focused", "workspace."].map((line, i) => (
             <motion.span
               key={line}
               className="block"
@@ -363,7 +363,7 @@ export function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.28, ease: EASE }}
           >
-            without the noise.
+            for work that moves.
           </motion.span>
         </h1>
 
@@ -374,10 +374,9 @@ export function Landing() {
             transition={{ duration: 0.8, delay: 0.4, ease: EASE }}
             className="max-w-md text-[15px] leading-relaxed text-ink-400"
           >
-            Nero is an open-source project manager with kanban boards,
-            priorities, labels, due dates, comments, team roles and a full
-            activity history — built on Next.js 16 and PostgreSQL, with the
-            source in this repo.
+            Nero gives focused teams one place to plan projects, move tasks,
+            collaborate, and understand progress — without the overhead of
+            heavyweight project-management suites.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -389,7 +388,7 @@ export function Landing() {
               href="/register"
               className="group flex items-center gap-2 rounded-sm bg-ink-50 px-6 py-3.5 text-[14px] font-semibold text-ink-950 transition-colors hover:bg-brand-200"
             >
-              Begin free
+              Create workspace
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
@@ -426,7 +425,7 @@ export function Landing() {
       </section>
 
       {/* ————— Chapters ————— */}
-      <section id="chapters" className="mx-auto max-w-6xl px-5 py-28">
+      <section id="features" className="mx-auto max-w-6xl px-5 py-28">
         <Chapter
           no="01"
           title="Paper, with physics"
@@ -490,28 +489,28 @@ export function Landing() {
 
       {/* ————— Manifesto ————— */}
       <section
-        id="manifesto"
+        id="how-it-works"
         className="relative border-y border-ink-50/8 bg-ink-900/40 py-28"
       >
         <div className="bg-ruled pointer-events-none absolute inset-0 opacity-60" />
         <Reveal className="relative mx-auto max-w-3xl px-5 text-center">
           <LogoMark size={44} className="mx-auto mb-10" />
           <p className="wonk font-display text-[28px] leading-snug font-medium tracking-tight text-ink-100 italic sm:text-[38px]">
-            “One Postgres, a handful of libraries, no hidden services —{" "}
-            <span className="text-gradient-brand">code you can read</span> in an
-            evening.”
+            “Everything your team needs to move work forward —{" "}
+            <span className="text-gradient-brand">projects, tasks, people, and progress</span>
+            in one focused workspace.”
           </p>
-          <p className="folio mt-8">Why Nero exists</p>
+          <p className="folio mt-8">How it works</p>
           <p className="mx-auto mt-6 max-w-lg text-[13.5px] leading-relaxed text-ink-400">
-            Nero is built to study how a modern full-stack app fits together:
-            server actions, typed queries, authentication and transactional
-            email — all visible, all in one repository.
+            Create a workspace, add projects, and turn work into clear tasks.
+            Your team can assign ownership, discuss decisions, and move work
+            across the board while Nero keeps progress visible.
           </p>
         </Reveal>
       </section>
 
       {/* ————— Index ————— */}
-      <section id="index" className="mx-auto max-w-4xl px-5 py-28">
+      <section id="stack" className="mx-auto max-w-4xl px-5 py-28">
         <Reveal>
           <p className="folio mb-4">Index</p>
           <h2 className="font-display text-[34px] font-medium tracking-tight text-ink-50 italic sm:text-[44px]">
@@ -560,8 +559,7 @@ export function Landing() {
             <span className="text-gradient-brand italic">Begin.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[14px] text-ink-400">
-            Create a workspace in ten seconds. Your first project — a guided
-            tour — is already waiting on the board.
+            Create a workspace, add a project, and start organizing work on the board.
           </p>
           <div className="mt-10 flex items-center justify-center gap-3">
             <Link
@@ -575,7 +573,7 @@ export function Landing() {
               href="/login"
               className="rounded-sm border border-ink-50/15 px-7 py-3.5 text-[14px] font-medium text-ink-200 transition-colors hover:border-brand-500/60 hover:text-brand-300"
             >
-              Explore the demo
+              Sign in
             </Link>
           </div>
         </Reveal>
