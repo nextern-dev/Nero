@@ -4,7 +4,8 @@
 
 # Nero
 
-**Open-source project management for focused teams — organize projects, track tasks on Kanban boards, collaborate with roles and invitations, and see progress without leaving your workspace.**
+**Open-source project management: kanban boards, priorities, labels, due
+dates, comments, team roles, activity history and a ⌘K palette.**
 
 Next.js 16 · React 19 · Tailwind CSS 4 · Drizzle ORM · PostgreSQL ·
 Auth.js v5 · Zod · Zustand · Resend · dnd kit
@@ -15,7 +16,6 @@ Auth.js v5 · Zod · Zustand · Resend · dnd kit
 
 ## Contents
 
-- [What is Nero?](#what-is-nero)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Data model](#data-model)
@@ -24,12 +24,6 @@ Auth.js v5 · Zod · Zustand · Resend · dnd kit
 - [Getting started](#getting-started)
 - [Scripts](#scripts)
 - [Roadmap](#roadmap)
-
-## What is Nero?
-
-Nero is a self-hosted, open-source project management app for teams that want a focused workspace for projects, Kanban tasks, collaboration and lightweight reporting.
-
-It is both a usable application and a readable full-stack reference built around Next.js, PostgreSQL and Drizzle ORM.
 
 ## Features
 
@@ -154,6 +148,7 @@ redirect URI to register).
 - [ ] File attachments
 - [ ] Notifications inbox
 - [ ] Public roadmap / changelog page
+- [ ] Tokenized invitation acceptance flow
 - [ ] E2E tests (Playwright) alongside CI
 
 ## License

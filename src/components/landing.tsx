@@ -117,7 +117,7 @@ function BoardPlate() {
         <div className="flex items-center gap-2 border-b border-ink-50/8 px-4 py-2.5">
           <LogoMark size={14} />
           <span className="font-mono text-[10px] tracking-[0.18em] text-ink-500 uppercase">
-            Nero — Project board
+            Nero Labs — Nero Web App
           </span>
           <span className="kbd ml-auto hidden sm:inline-flex">⌘K</span>
         </div>
@@ -154,7 +154,7 @@ function BoardPlate() {
               className="relative"
             >
               <MiniCard
-                title="Reorder tasks"
+                title="Kanban drag physics pass"
                 tag="Improvement"
                 tagColor="#7c9fb8"
                 priority="high"
@@ -170,7 +170,7 @@ function BoardPlate() {
               </motion.span>
             </motion.div>
             <div className="hidden sm:block">
-              <MiniCard title="Review dashboard progress" priority="low" />
+              <MiniCard title="Tune area-chart easing" priority="low" />
             </div>
           </div>
           <div className="space-y-2.5">
@@ -426,12 +426,12 @@ export function Landing() {
       </section>
 
       {/* ————— Chapters ————— */}
-      <section id="features" className="mx-auto max-w-6xl px-5 py-28">
+      <section id="chapters" className="mx-auto max-w-6xl px-5 py-28">
         <Chapter
           no="01"
           title="Paper, with physics"
-          body="Drag tasks between columns with optimistic updates. Dropping a task into “Done” records its completion."
-          caption="Fig. 02 — five columns, direct manipulation"
+          body="Drag between columns and the board answers instantly — optimistic updates first, PostgreSQL persistence a heartbeat later. Dropping into “Done” completes the task for you."
+          caption="Fig. 02 — five columns, zero friction"
         >
           <div className="grid grid-cols-2 gap-3">
             <MiniCard
@@ -490,15 +490,16 @@ export function Landing() {
 
       {/* ————— Manifesto ————— */}
       <section
-        id="how-it-works"
+        id="manifesto"
         className="relative border-y border-ink-50/8 bg-ink-900/40 py-28"
       >
         <div className="bg-ruled pointer-events-none absolute inset-0 opacity-60" />
         <Reveal className="relative mx-auto max-w-3xl px-5 text-center">
           <LogoMark size={44} className="mx-auto mb-10" />
           <p className="wonk font-display text-[28px] leading-snug font-medium tracking-tight text-ink-100 italic sm:text-[38px]">
-            “One PostgreSQL database, a small set of libraries —{" "}
-            code you can read in an evening.”
+            “One Postgres, a handful of libraries, no hidden services —{" "}
+            <span className="text-gradient-brand">code you can read</span> in an
+            evening.”
           </p>
           <p className="folio mt-8">Why Nero exists</p>
           <p className="mx-auto mt-6 max-w-lg text-[13.5px] leading-relaxed text-ink-400">
@@ -510,15 +511,15 @@ export function Landing() {
       </section>
 
       {/* ————— Index ————— */}
-      <section id="stack" className="mx-auto max-w-4xl px-5 py-28">
+      <section id="index" className="mx-auto max-w-4xl px-5 py-28">
         <Reveal>
-          <p className="folio mb-4">Stack</p>
+          <p className="folio mb-4">Index</p>
           <h2 className="font-display text-[34px] font-medium tracking-tight text-ink-50 italic sm:text-[44px]">
-            Built from familiar tools
+            Composed of fine materials
           </h2>
           <p className="mt-3 max-w-lg text-[14px] leading-relaxed text-ink-400">
             Every layer is open source and inspectable. Fork it, read it, run
-            it on your own infrastructure.
+            it on a box under your desk.
           </p>
         </Reveal>
         <Reveal className="mt-12" delay={0.1}>
@@ -559,7 +560,8 @@ export function Landing() {
             <span className="text-gradient-brand italic">Begin.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[14px] text-ink-400">
-            Create a workspace, add a project, and start organizing work on the board.
+            Create a workspace in ten seconds. Your first project — a guided
+            tour — is already waiting on the board.
           </p>
           <div className="mt-10 flex items-center justify-center gap-3">
             <Link
@@ -573,7 +575,7 @@ export function Landing() {
               href="/login"
               className="rounded-sm border border-ink-50/15 px-7 py-3.5 text-[14px] font-medium text-ink-200 transition-colors hover:border-brand-500/60 hover:text-brand-300"
             >
-              Sign in
+              Explore the demo
             </Link>
           </div>
         </Reveal>

@@ -11,7 +11,12 @@ const FROM = process.env.EMAIL_FROM ?? "Nero <onboarding@resend.dev>";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 function escapeHtml(value: string) {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function shell(heading: string, body: string) {
@@ -36,12 +41,13 @@ function shell(heading: string, body: string) {
 }
 
 async function deliver(to: string, subject: string, html: string) {
+  const safeSubject = subject.replace(/[\\r\\n]+/g, " ").trim();
   if (!resend) {
     console.log(`[nero:email] RESEND_API_KEY not set — skipped "${subject}" → ${to}`);
     return { delivered: false as const };
   }
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    await resend.emails.send({ from: FROM, to, subject: safeSubject, html });
     return { delivered: true as const };
   } catch (error) {
     console.error("[nero:email] delivery failed:", error);
