@@ -1,6 +1,6 @@
 <div align="center">
 
-![Nero](public/og/cover.png)
+![Nero](public/cover.png)
 
 # Nero
 
@@ -120,8 +120,8 @@ scripts/seed.ts     # idempotent demo seed (demo@nero.dev / demo1234)
 ```bash
 npm install
 cp .env.example .env          # DATABASE_URL + AUTH_SECRET are required
-npx drizzle-kit push          # create the schema
-npx tsx scripts/seed.ts       # optional: rich demo workspace
+npm run db:migrate             # apply committed Drizzle migrations
+npx tsx scripts/seed.ts        # optional: rich demo workspace
 npm run dev
 ```
 
