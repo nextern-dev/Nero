@@ -65,7 +65,7 @@ export const taskCreateSchema = z.object({
   description: z.string().trim().max(5000).optional().or(z.literal("")),
   priority: prioritySchema.default("none"),
   assigneeId: optionalUuid,
-  dueDate: optionalDate,
+  dueDate: optionalDate.default(null),
   labelIds: z.array(z.string().uuid()).default([]),
 });
 
