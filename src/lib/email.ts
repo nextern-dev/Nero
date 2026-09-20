@@ -8,7 +8,11 @@ import { Resend } from "resend";
 const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
 const FROM = process.env.EMAIL_FROM ?? "Nero <onboarding@resend.dev>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+
+function escapeHtml(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
 
 function shell(heading: string, body: string) {
   return `<!doctype html>
@@ -21,10 +25,10 @@ function shell(heading: string, body: string) {
       <div style="background:#14110D;border:1px solid rgba(246,240,227,0.1);padding:34px;">
         <h1 style="margin:0 0 12px;color:#F6F0E3;font-size:24px;font-weight:600;font-style:italic;letter-spacing:-0.01em;">${heading}</h1>
         <div style="color:#BCAF97;font-size:14px;line-height:1.8;font-family:'Segoe UI',Arial,sans-serif;">${body}</div>
-        <a href="${APP_URL}" style="display:inline-block;margin-top:26px;background:#F6F0E3;color:#0D0B08;text-decoration:none;font-weight:600;font-size:13px;padding:12px 24px;font-family:'Segoe UI',Arial,sans-serif;">Open Nero</a>
+        <a href="${escapeHtml(APP_URL)}" style="display:inline-block;margin-top:26px;background:#F6F0E3;color:#0D0B08;text-decoration:none;font-weight:600;font-size:13px;padding:12px 24px;font-family:'Segoe UI',Arial,sans-serif;">Open Nero</a>
       </div>
       <p style="color:#6B5D49;font-size:12px;margin-top:24px;line-height:1.7;font-style:italic;">
-        Nero — project management, as a fine art. Open source, built with Next.js &amp; PostgreSQL.
+        Nero — focused project management. Open source, built with Next.js &amp; PostgreSQL.
       </p>
     </div>
   </body>
@@ -60,16 +64,17 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 export async function sendInviteEmail(
   to: string,
-  opts: { workspaceName: string; inviterName: string },
+  opts: { workspaceName: string; inviterName: string; token: string },
 ) {
   return deliver(
     to,
     `${opts.inviterName} invited you to ${opts.workspaceName}`,
     shell(
       "You've been invited",
-      `<b style="color:#F6F0E3">${escapeHtml(opts.inviterName)}</b> added you to the
-       <b style="color:#F6F0E3">${opts.workspaceName}</b> workspace on Nero.
-       Create your account with this email to take your seat at the board.`,
+      `<b style="color:#F6F0E3">${escapeHtml(opts.inviterName)}</b> added you to the\n       <b style="color:#F6F0E3">${escapeHtml(opts.workspaceName)}</b> workspace on Nero.
+       Create your account with this email to take your seat at the board.<br/><br/>
+       <a href="${escapeHtml(APP_URL)}/invite/${encodeURIComponent(opts.token)}"
+          style="display:inline-block;background:#F6F0E3;color:#0D0B08;text-decoration:none;font-weight:600;font-size:13px;padding:12px 24px;font-family:'Segoe UI',Arial,sans-serif;">Accept invitation</a>`,
     ),
   );
 }
