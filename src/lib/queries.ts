@@ -367,7 +367,7 @@ export async function searchWorkspace(
     .limit(4);
 
   const taskRows = await db
-        .select({
+    .select({
           id: tasks.id,
           title: tasks.title,
           number: tasks.number,
@@ -375,13 +375,12 @@ export async function searchWorkspace(
           projectKey: projects.key,
           projectColor: projects.color,
         })
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.projectId, projects.id))
-        .where(
-          and(eq(projects.workspaceId, workspaceId), ilike(tasks.title, pattern)),
-        )
-        .limit(6)
-    : [];
+    .from(tasks)
+    .innerJoin(projects, eq(tasks.projectId, projects.id))
+    .where(
+      and(eq(projects.workspaceId, workspaceId), ilike(tasks.title, pattern)),
+    )
+    .limit(6);
 
   return {
     projects: projs.map((p) => ({
