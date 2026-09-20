@@ -139,7 +139,7 @@ redirect URI to register).
 | `npm run typecheck` | `tsc --noEmit`                   |
 | `npm test`          | Run validation tests              |
 | `npm run db:migrate` | Apply committed Drizzle migrations |
-| `npx drizzle-kit push` | Apply schema to the database  |
+| `npx drizzle-kit push` | Push the current schema during local development |
 | `npx tsx scripts/seed.ts` | Seed demo data              |
 
 ## Roadmap
