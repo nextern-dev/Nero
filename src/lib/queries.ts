@@ -327,7 +327,7 @@ export async function getMembersWithStats(
         })
         .from(tasks)
         .where(inArray(tasks.projectId, ids))
-
+    : [];
 
   return members.map((m) => ({
     ...toUserDTO(m.user),
