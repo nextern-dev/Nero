@@ -89,7 +89,10 @@ export const projects = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("projects_workspace_idx").on(t.workspaceId)],
+  (t) => [
+    index("projects_workspace_idx").on(t.workspaceId),
+    uniqueIndex("projects_workspace_key_unique").on(t.workspaceId, t.key),
+  ],
 );
 
 export const boardColumns = pgTable(
@@ -156,6 +159,16 @@ export const labels = pgTable(
     color: text("color").notNull(),
   },
   (t) => [index("labels_project_idx").on(t.projectId)],
+);
+
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").primaryKey(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
 );
 
 export const taskLabels = pgTable(

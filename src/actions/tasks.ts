@@ -12,9 +12,13 @@ import {
 import { logActivity } from "@/lib/activity";
 import { isDoneColumn } from "@/lib/constants";
 import {
+  requireColumnInProject,
+  requireLabelsInProject,
   requireProjectAccess,
   requireTaskAccess,
+  requireTaskIdsInColumn,
   requireUser,
+  requireWorkspaceMember,
 } from "@/lib/session";
 import type { CommentDTO } from "@/lib/types";
 import {
@@ -43,6 +47,9 @@ export async function createTask(
     if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
     const data = parsed.data;
     const { project } = await requireProjectAccess(user.id, data.projectId);
+    await requireColumnInProject(data.columnId, project.id);
+    await requireLabelsInProject(data.labelIds, project.id);
+    if (data.assigneeId) await requireWorkspaceMember(data.assigneeId, project.workspaceId);
 
     const [counter] = await db
       .update(projects)
@@ -101,6 +108,9 @@ export async function updateTask(input: unknown): Promise<ActionResult> {
       .limit(1);
 
     const key = `${project.key}-${task.number}`;
+    if (data.columnId !== undefined) await requireColumnInProject(data.columnId, project.id);
+    if (data.labelIds !== undefined) await requireLabelsInProject(data.labelIds, project.id);
+    if (data.assigneeId) await requireWorkspaceMember(data.assigneeId, project.workspaceId);
     const set: Partial<typeof tasks.$inferInsert> = { updatedAt: new Date() };
 
     if (data.title !== undefined) set.title = data.title;
@@ -220,6 +230,9 @@ export async function moveTask(input: unknown): Promise<ActionResult> {
       .where(eq(boardColumns.projectId, project.id));
     const fromCol = cols.find((c) => c.id === from.columnId);
     const toCol = cols.find((c) => c.id === to.columnId);
+    if (!fromCol || !toCol) return { ok: false, error: "Invalid board column" };
+    await requireTaskIdsInColumn(from.ids, from.columnId, project.id);
+    await requireTaskIdsInColumn(to.ids, to.columnId, project.id);
 
     let completedAt = task.completedAt;
     let activity: { action: string; meta: Record<string, unknown> } | null =

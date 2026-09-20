@@ -1,9 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { projects, users, workspaceMembers } from "@/db/schema";
+import { boardColumns, labels, projects, tasks, users, workspaceMembers } from "@/db/schema";
 
 export const WS_COOKIE = "nero_ws";
 
@@ -76,6 +76,30 @@ export async function requireProjectAccess(userId: string, projectId: string) {
     .limit(1);
   if (!membership) throw new Error("You do not have access to this project");
   return { project, membership };
+}
+
+export async function requireColumnInProject(columnId: string, projectId: string) {
+  const [column] = await db.select().from(boardColumns).where(and(eq(boardColumns.id, columnId), eq(boardColumns.projectId, projectId))).limit(1);
+  if (!column) throw new Error("Column does not belong to this project");
+  return column;
+}
+
+export async function requireLabelsInProject(labelIds: string[], projectId: string) {
+  if (!labelIds.length) return;
+  const rows = await db.select({ id: labels.id }).from(labels).where(and(eq(labels.projectId, projectId), inArray(labels.id, labelIds)));
+  if (rows.length !== new Set(labelIds).size) throw new Error("One or more labels do not belong to this project");
+}
+
+export async function requireWorkspaceMember(userId: string, workspaceId: string) {
+  const [membership] = await db.select().from(workspaceMembers).where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId))).limit(1);
+  if (!membership) throw new Error("User is not a member of this workspace");
+  return membership;
+}
+
+export async function requireTaskIdsInColumn(ids: string[], columnId: string, projectId: string) {
+  if (!ids.length) return;
+  const rows = await db.select({ id: tasks.id }).from(tasks).where(and(eq(tasks.projectId, projectId), eq(tasks.columnId, columnId), inArray(tasks.id, ids)));
+  if (rows.length !== new Set(ids).size) throw new Error("Invalid task ordering payload");
 }
 
 export async function requireTaskAccess(userId: string, taskId: string) {

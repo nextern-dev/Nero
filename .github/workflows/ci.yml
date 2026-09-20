@@ -50,3 +50,6 @@ jobs:
 
       - name: Typecheck
         run: npx tsc --noEmit --pretty false
+
+      - name: Tests
+        run: npm test

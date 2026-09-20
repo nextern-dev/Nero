@@ -7,6 +7,7 @@ import { signIn, signOut } from "@/auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { provisionUser } from "@/lib/provision";
+import { consumeRateLimit } from "@/lib/rate-limit";
 import {
   loginSchema,
   registerSchema,
@@ -18,6 +19,7 @@ export async function register(input: unknown): Promise<ActionResult> {
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
   const { name, email, password } = parsed.data;
+  if (!(await consumeRateLimit(`register:${email}`, 5, 60 * 60 * 1000))) return { ok: false, error: "Too many registration attempts. Try again later." };
 
   const [existing] = await db
     .select({ id: users.id })
@@ -48,6 +50,7 @@ export async function register(input: unknown): Promise<ActionResult> {
 export async function login(input: unknown): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
+  if (!(await consumeRateLimit(`login-action:${parsed.data.email}`, 10, 15 * 60 * 1000))) return { ok: false, error: "Too many login attempts. Try again later." };
 
   try {
     await signIn("credentials", {

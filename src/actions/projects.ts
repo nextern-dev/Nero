@@ -1,5 +1,6 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { boardColumns, labels, projects } from "@/db/schema";
@@ -19,6 +20,9 @@ export async function createProject(
   const parsed = projectCreateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: zodError(parsed.error) };
   const data = parsed.data;
+
+  const [duplicate] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.workspaceId, workspace.id), eq(projects.key, data.key))).limit(1);
+  if (duplicate) return { ok: false, error: "A project with this key already exists in the workspace" };
 
   const [project] = await db
     .insert(projects)

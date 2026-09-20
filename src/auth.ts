@@ -7,6 +7,10 @@ import { z } from "zod";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { provisionUser, randomPasswordHash } from "@/lib/provision";
+import { consumeRateLimit } from "@/lib/rate-limit";
+
+const authSecret = process.env.AUTH_SECRET;
+if (!authSecret) throw new Error("AUTH_SECRET is required");
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -21,18 +25,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   trustHost: true,
-  // AUTH_SECRET should be set in .env; the fallback keeps local/CI
-  // environments from failing with a cryptic configuration error.
-  secret:
-    process.env.AUTH_SECRET ??
-    "nero-insecure-fallback-change-me-in-production",
+  secret: authSecret,
   providers: [
     ...(googleConfigured
       ? [
           Google({
             clientId: process.env.AUTH_GOOGLE_ID!,
             clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
@@ -47,6 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const email = parsed.data.email.toLowerCase().trim();
+        if (!(await consumeRateLimit(`login:${email}`, 10, 15 * 60 * 1000))) return null;
         const [user] = await db
           .select()
           .from(users)

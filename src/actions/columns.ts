@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { boardColumns } from "@/db/schema";
 import { requireProjectAccess, requireUser } from "@/lib/session";
@@ -111,7 +111,7 @@ export async function reorderColumns(input: unknown): Promise<ActionResult> {
           tx
             .update(boardColumns)
             .set({ sortOrder: i })
-            .where(eq(boardColumns.id, id)),
+            .where(and(eq(boardColumns.id, id), eq(boardColumns.projectId, parsed.data.projectId))),
         ),
       );
     });

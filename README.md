@@ -33,7 +33,7 @@ Auth.js v5 · Zod · Zustand · Resend · dnd kit
 | Tasks           | Descriptions, 5 priority levels, labels, due dates, assignees, `NER-21` numbering, comments     |
 | Command palette | ⌘K searches task titles and projects, quick actions, full keyboard navigation                    |
 | Dashboard       | Tasks-completed-per-day chart, open-work-by-column donut, your open tasks, project progress     |
-| Workspaces      | Owner / admin / member roles, add teammates by email (invite sent via Resend), workspace switcher |
+| Workspaces      | Owner / admin / member roles, workspace membership checks, email onboarding invites via Resend, workspace switcher |
 | Activity        | Every create / move / complete / comment, grouped by day                                         |
 | Auth            | Email + password and Google OAuth (Auth.js v5, JWT sessions, bcrypt)                             |
 
@@ -66,12 +66,12 @@ app router
 
 ## Data model
 
-10 tables, all in `src/db/schema.ts` with Drizzle relations and cascade
+11 tables, all in `src/db/schema.ts` with Drizzle relations and cascade
 rules:
 
 `users` · `workspaces` · `workspace_members` (role enum) · `projects` ·
 `board_columns` · `tasks` (priority enum, position, `completedAt`) ·
-`labels` · `task_labels` · `comments` · `activities`
+`labels` · `task_labels` · `comments` · `activities` · `rate_limits`
 
 ## Implementation highlights
 
@@ -90,6 +90,7 @@ rules:
   path draw-in, hover crosshair) and donut, no chart dependency.
 - **Deep-linked task modal** — `?task=<id>` opens the editor from anywhere
   (palette results, dashboard rows), and clears on close.
+- **Security boundaries** — project/column/label/assignee relationships are checked server-side, project keys are unique per workspace, and authentication endpoints use a PostgreSQL-backed rate limiter.
 - **Email that degrades gracefully** — without `RESEND_API_KEY` messages
   are logged, never thrown.
 
@@ -135,6 +136,7 @@ redirect URI to register).
 | `npm run build`     | Production build                 |
 | `npm run lint`      | ESLint                           |
 | `npm run typecheck` | `tsc --noEmit`                   |
+| `npm test`          | Run validation tests              |
 | `npx drizzle-kit push` | Apply schema to the database  |
 | `npx tsx scripts/seed.ts` | Seed demo data              |
 
@@ -144,6 +146,7 @@ redirect URI to register).
 - [ ] File attachments
 - [ ] Notifications inbox
 - [ ] Public roadmap / changelog page
+- [ ] Tokenized invitation acceptance flow
 - [ ] E2E tests (Playwright) alongside CI
 
 ## License
