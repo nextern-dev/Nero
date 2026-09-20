@@ -244,6 +244,10 @@ export async function getDashboardStats(workspaceId: string) {
     };
   }
 
+  const today = startOfToday();
+  const weekAgo = subDays(new Date(), 7);
+  const twoWeeksAgo = subDays(new Date(), 14);
+
   const [summary, completedRows, statusRows] = await Promise.all([
     db.select({
       open: sql<number>`count(*) filter (where ${tasks.completedAt} is null)`,
