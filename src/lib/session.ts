@@ -11,7 +11,7 @@ export async function getSessionUser() {
   const session = await auth();
   const id = session?.user?.id;
   if (!id) return null;
-  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  const [user] = await db.select({ id: users.id, name: users.name, email: users.email, color: users.color }).from(users).where(eq(users.id, id)).limit(1);
   return user ?? null;
 }
 
